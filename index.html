@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Happy Birthday!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     🎈 EASY CUSTOMISATION IS IN THE <script> AT THE BOTTOM 🎈
+     ============================================================ */
+  :root{
+    --bg1:#1a1033; --bg2:#2d1b4e; --bg3:#3a1f5c;
+    --gold:#ffd86b; --flame:#ff8a3d; --pink:#ff6fae; --mint:#7cf5c0;
+    --cream:#fff3e6; --rose:#f7a8c4; --choc:#7a4a3a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Quicksand',system-ui,sans-serif;
+    background:radial-gradient(1200px 800px at 50% 0%, var(--bg3), var(--bg2) 45%, var(--bg1) 100%);
+    color:var(--cream);
+    min-height:100%;
+    overflow-x:hidden;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    position:relative;
+  }
+  /* twinkling stars background */
+  .stars{position:fixed; inset:0; pointer-events:none; z-index:0;}
+  .stars span{
+    position:absolute; width:3px; height:3px; border-radius:50%;
+    background:#fff; opacity:.7; animation:twinkle 3s infinite ease-in-out;
+  }
+  @keyframes twinkle{0%,100%{opacity:.15; transform:scale(.6);}50%{opacity:.9; transform:scale(1.1);}}
+
+  #fxCanvas{position:fixed; inset:0; z-index:5; pointer-events:none;}
+
+  .stage{position:relative; z-index:2; width:100%; max-width:560px; padding:32px 20px;}
+
+  /* ---------- Scene 1: the cake ---------- */
+  .scene{opacity:0; transform:translateY(14px); transition:opacity .9s ease, transform .9s ease; display:none;}
+  .scene.show{opacity:1; transform:translateY(0); display:block;}
+
+  .cake{position:relative; width:230px; margin:10px auto 0;}
+  .candle-row{position:absolute; top:-46px; left:0; right:0;
+    display:flex; justify-content:center; gap:16px;}
+  .candle{position:relative; cursor:pointer; width:12px;}
+  .stick{width:12px; height:42px; border-radius:3px;
+    background:repeating-linear-gradient(45deg,#ff7eb3 0 6px,#fff 6px 12px);
+    box-shadow:0 2px 4px rgba(0,0,0,.3);}
+  .wick{position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+    width:2px; height:6px; background:#3a2a2a;}
+  .flame{position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    width:14px; height:22px; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+    background:radial-gradient(circle at 50% 70%, #fff8b0, var(--flame) 60%, #ff5722 100%);
+    box-shadow:0 0 18px 6px rgba(255,138,61,.65);
+    animation:flicker .12s infinite alternate; transform-origin:50% 90%;}
+  @keyframes flicker{
+    from{transform:translateX(-50%) scaleY(1) rotate(-2deg);}
+    to{transform:translateX(-50%) scaleY(1.12) rotate(2deg);}
+  }
+  .candle.out .flame{display:none;}
+  .smoke{position:absolute; top:-22px; left:50%; width:8px; height:8px;
+    border-radius:50%; background:rgba(220,220,220,.5); opacity:0;}
+  .smoke.go{animation:smoke 1.1s ease-out forwards;}
+  @keyframes smoke{
+    0%{opacity:.6; transform:translate(-50%,0) scale(.6);}
+    100%{opacity:0; transform:translate(-50%,-40px) scale(1.6);}
+  }
+
+  .frosting{height:34px; border-radius:18px 18px 8px 8px; background:var(--cream);
+    position:relative; box-shadow:inset 0 -6px 0 rgba(0,0,0,.04);}
+  .frosting::after{content:""; position:absolute; left:0; right:0; bottom:-10px; height:18px;
+    background:var(--cream);
+    -webkit-mask:radial-gradient(12px at 12px bottom, transparent 98%, #000) repeat-x;
+    mask:radial-gradient(12px at 12px bottom, transparent 98%, #000) repeat-x;
+    -webkit-mask-size:24px 18px; mask-size:24px 18px;}
+  .body1{height:70px; background:var(--rose); margin-top:6px; border-radius:6px;}
+  .body2{height:48px; background:var(--choc); border-radius:6px; margin-top:2px;}
+  .plate{height:14px; width:280px; margin:6px auto 0; border-radius:50%;
+    background:linear-gradient(#dcd3e8,#b9aecf); box-shadow:0 14px 24px rgba(0,0,0,.4);}
+
+  .hint{margin-top:30px; font-weight:600; letter-spacing:.3px; color:var(--gold);
+    animation:bob 1.8s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0); opacity:.85;}50%{transform:translateY(-5px); opacity:1;}}
+
+  /* ---------- Scene 2: celebration ---------- */
+  .hb{font-family:'Pacifico',cursive; line-height:1.1;
+    font-size:clamp(40px,11vw,70px);
+    background:linear-gradient(90deg,var(--gold),var(--pink),var(--mint),var(--gold));
+    background-size:300% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:shine 6s linear infinite; text-shadow:0 4px 30px rgba(255,111,174,.25);}
+  @keyframes shine{to{background-position:300% 0;}}
+  .name{font-family:'Pacifico',cursive; font-size:clamp(26px,7vw,40px); color:var(--cream); margin-top:4px;}
+
+  .photo-wrap{margin:26px auto 0; width:min(280px,80vw); opacity:0; transform:scale(.92);
+    transition:opacity .8s ease, transform .8s ease;}
+  .photo-wrap.show{opacity:1; transform:scale(1);}
+  .frame{border-radius:18px; padding:10px; background:linear-gradient(135deg,#fff,#ffe9f3);
+    box-shadow:0 18px 40px rgba(0,0,0,.45); transform:rotate(-2deg);}
+  .frame img{width:100%; border-radius:10px; display:block;}
+  .frame .placeholder{width:100%; aspect-ratio:4/5; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    background:repeating-linear-gradient(45deg,#ffe0ee 0 14px,#ffd1e6 14px 28px);
+    color:#b15c84; font-weight:600; padding:16px;}
+
+  .final{margin:30px auto 10px; max-width:440px; font-size:clamp(17px,4.6vw,21px);
+    line-height:1.6; font-weight:500; color:var(--cream);
+    opacity:0; transform:translateY(12px); transition:opacity 1s ease, transform 1s ease;}
+  .final.show{opacity:1; transform:translateY(0);}
+  .final .big{display:block; font-family:'Pacifico',cursive; color:var(--gold);
+    font-size:clamp(22px,6vw,30px); margin-bottom:10px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <canvas id="fxCanvas"></canvas>
+
+  <div class="stage">
+    <!-- SCENE 1 : CAKE -->
+    <section class="scene show" id="cakeScene">
+      <div class="cake">
+        <div class="candle-row" id="candleRow"></div>
+        <div class="frosting"></div>
+        <div class="body1"></div>
+        <div class="body2"></div>
+      </div>
+      <div class="plate"></div>
+      <p class="hint" id="hint">Tap each candle to blow it out 🎂</p>
+    </section>
+
+    <!-- SCENE 2 : CELEBRATION -->
+    <section class="scene" id="party">
+      <h1 class="hb" id="hbText">Happy Birthday!</h1>
+      <div class="name" id="nameText"></div>
+
+      <div class="photo-wrap" id="photoWrap">
+        <div class="frame" id="frame"></div>
+      </div>
+
+      <div class="final" id="finalMsg"></div>
+    </section>
+  </div>
+
+<script>
+/* ============================================================
+   ✨  CUSTOMISE EVERYTHING HERE  ✨
+   ============================================================ */
+const CONFIG = {
+  friendName:        "Maha",                  // your friend's name (shows under Happy Birthday)
+  candleCount:       5,                        // how many candles on the cake
+
+  // PHOTO: put your image file next to this HTML file and write its name,
+  // e.g. "photo.jpg"  — or paste a full image link "https://..."
+  // Leave it as "" to show a placeholder for now.
+  photoUrl:          "",
+
+  waitSeconds:       20,                        // pause before the final message (you asked for 20)
+
+  // The final heartfelt message (the first line is large)
+  finalBig:          "Hi Maha 💛",
+  finalText:         "Happy birthday. I have never seen such a pure soul like you. "
+                   + "From this birthday, everything will be alright for you. "
+                   + "I wish you the best in your life. Don't lose your smile any day. Please be happy."
+};
+/* ============================================================
+   (No need to edit below this line)
+   ============================================================ */
+
+// --- starfield ---
+const starBox = document.getElementById('stars');
+for(let i=0;i<60;i++){
+  const s=document.createElement('span');
+  s.style.left=Math.random()*100+'%';
+  s.style.top=Math.random()*100+'%';
+  s.style.animationDelay=(Math.random()*3)+'s';
+  starBox.appendChild(s);
+}
+
+// --- build candles ---
+const row=document.getElementById('candleRow');
+let lit=CONFIG.candleCount;
+for(let i=0;i<CONFIG.candleCount;i++){
+  const c=document.createElement('div');
+  c.className='candle';
+  c.innerHTML='<div class="smoke"></div><div class="flame"></div><div class="stick"></div><div class="wick"></div>';
+  c.addEventListener('click',()=>blow(c));
+  row.appendChild(c);
+}
+
+function blow(candle){
+  if(candle.classList.contains('out')) return;
+  candle.classList.add('out');
+  const smoke=candle.querySelector('.smoke');
+  smoke.classList.add('go');
+  lit--;
+  if(lit<=0){
+    document.getElementById('hint').textContent='Yay! 🎉';
+    setTimeout(toParty, 900);
+  }
+}
+
+// --- transition to celebration ---
+function toParty(){
+  document.getElementById('cakeScene').classList.remove('show');
+  setTimeout(()=>{
+    const party=document.getElementById('party');
+    party.classList.add('show');
+
+    document.getElementById('hbText').textContent = CONFIG.friendName
+      ? "Happy Birthday," : "Happy Birthday!";
+    document.getElementById('nameText').textContent = CONFIG.friendName || "";
+
+    // photo
+    const frame=document.getElementById('frame');
+    if(CONFIG.photoUrl){
+      const img=new Image();
+      img.alt='Birthday photo';
+      img.onerror=()=>{ frame.innerHTML='<div class="placeholder">Add your photo:<br>set photoUrl in the code</div>'; };
+      img.src=CONFIG.photoUrl;
+      frame.appendChild(img);
+    } else {
+      frame.innerHTML='<div class="placeholder">📸<br>Your photo goes here<br><small>(set photoUrl in the code)</small></div>';
+    }
+    setTimeout(()=>document.getElementById('photoWrap').classList.add('show'), 700);
+
+    // final message after the wait, then fireworks
+    setTimeout(()=>{
+      const fm=document.getElementById('finalMsg');
+      fm.innerHTML='<span class="big">'+CONFIG.finalBig+'</span>'+CONFIG.finalText;
+      fm.classList.add('show');
+      startFX();
+    }, 700 + CONFIG.waitSeconds*1000);
+  }, 950);
+}
+
+// --- fireworks + confetti ---
+const canvas=document.getElementById('fxCanvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+resize(); addEventListener('resize',resize);
+const palette=['#ffd86b','#ff6fae','#7cf5c0','#7aa8ff','#ff8a3d','#c08bff'];
+const rnd=(a,b)=>a+Math.random()*(b-a);
+let parts=[], running=false, fwT=0;
+
+function firework(){
+  const x=rnd(W*0.15,W*0.85), y=rnd(H*0.12,H*0.5);
+  const col=palette[Math.floor(Math.random()*palette.length)], n=64;
+  for(let i=0;i<n;i++){
+    const a=(Math.PI*2*i)/n, sp=rnd(2,6.5);
+    parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,
+      color:col,size:rnd(2,3.5),g:0.05,type:'spark'});
+  }
+}
+function confetti(){
+  for(let i=0;i<5;i++){
+    parts.push({x:rnd(0,W),y:-10,vx:rnd(-1.2,1.2),vy:rnd(1.5,3.5),life:1,
+      color:palette[Math.floor(Math.random()*palette.length)],
+      size:rnd(6,11),g:0.03,type:'conf',rot:rnd(0,6.28),vr:rnd(-0.25,0.25)});
+  }
+}
+function tick(){
+  if(!running) return;
+  ctx.clearRect(0,0,W,H);
+  if(++fwT>22){ firework(); fwT=0; }
+  confetti();
+  for(const p of parts){
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy;
+    if(p.type==='spark') p.life-=0.012; else { p.rot+=p.vr; if(p.y>H+20)p.life=0; }
+    ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color;
+    if(p.type==='conf'){
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6); ctx.restore();
+    }else{ ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,6.28); ctx.fill(); }
+  }
+  ctx.globalAlpha=1;
+  parts=parts.filter(p=>p.life>0 && p.y<H+60);
+  requestAnimationFrame(tick);
+}
+function startFX(){ if(running)return; running=true; tick(); }
+</script>
+</body>
+</html>
