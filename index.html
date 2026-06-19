@@ -38,6 +38,14 @@
 
   #fxCanvas{position:fixed; inset:0; z-index:5; pointer-events:none;}
 
+  #muteBtn{position:fixed; top:14px; right:14px; z-index:10; display:none;
+    width:46px; height:46px; border-radius:50%; border:1px solid rgba(255,255,255,.25);
+    cursor:pointer; background:rgba(255,255,255,.14); color:#fff; font-size:20px;
+    align-items:center; justify-content:center; backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px); transition:transform .15s ease, background .2s ease;}
+  #muteBtn:hover{transform:scale(1.08); background:rgba(255,255,255,.24);}
+  #muteBtn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
   .stage{position:relative; z-index:2; width:100%; max-width:560px; padding:32px 20px;}
 
   /* ---------- Scene 1: the cake ---------- */
@@ -123,6 +131,7 @@
 <body>
   <div class="stars" id="stars"></div>
   <canvas id="fxCanvas"></canvas>
+  <button id="muteBtn" aria-label="Toggle music">🔊</button>
 
   <div class="stage">
     <!-- SCENE 1 : CAKE -->
@@ -156,14 +165,19 @@
    ============================================================ */
 const CONFIG = {
   friendName:        "Maha",                  // your friend's name (shows under Happy Birthday)
-  candleCount:       5,                        // how many candles on the cake
+  candleCount:       3,                        // how many candles on the cake
 
   // PHOTO: put your image file next to this HTML file and write its name,
   // e.g. "photo.jpg"  — or paste a full image link "https://..."
   // Leave it as "" to show a placeholder for now.
   photoUrl:          "IMG_20260619_093326.jpg",
 
-  waitSeconds:       20,                        // pause before the final message (you asked for 20)
+  waitSeconds:       5,                         // pause before the final message
+
+  // MUSIC: drop an audio file next to this HTML and write its name, e.g. "song.mp3"
+  // — or paste a full link. Leave "" to play a built-in Happy Birthday tune instead.
+  songUrl:           "",
+  playBuiltInTune:   true,                      // if songUrl is empty, play a Happy Birthday melody
 
   // The final heartfelt message (the first line is large)
   finalBig:          "Hi Maha 💛",
@@ -188,11 +202,14 @@ for(let i=0;i<60;i++){
 // --- build candles ---
 const row=document.getElementById('candleRow');
 let lit=CONFIG.candleCount;
+document.getElementById('hint').textContent = CONFIG.candleCount === 1
+  ? "Tap the candle to blow it out 🎂"
+  : "Tap each candle to blow it out 🎂";
 for(let i=0;i<CONFIG.candleCount;i++){
   const c=document.createElement('div');
   c.className='candle';
   c.innerHTML='<div class="smoke"></div><div class="flame"></div><div class="stick"></div><div class="wick"></div>';
-  c.addEventListener('click',()=>blow(c));
+  c.addEventListener('click',()=>{ startMusic(); blow(c); });
   row.appendChild(c);
 }
 
@@ -287,6 +304,64 @@ function tick(){
   requestAnimationFrame(tick);
 }
 function startFX(){ if(running)return; running=true; tick(); }
+
+// --- music ---
+let audioStarted=false, muted=false;
+let htmlAudio=null, audioCtx=null, synthGain=null;
+const SYNTH_VOL=0.16;
+
+function startMusic(){
+  if(audioStarted) return; audioStarted=true;
+  const btn=document.getElementById('muteBtn');
+  btn.style.display='flex';
+  btn.onclick=()=>{
+    muted=!muted;
+    if(htmlAudio) htmlAudio.muted=muted;
+    if(synthGain) synthGain.gain.value = muted?0:SYNTH_VOL;
+    btn.textContent = muted ? '🔇' : '🔊';
+  };
+
+  if(CONFIG.songUrl){
+    htmlAudio=new Audio(CONFIG.songUrl);
+    htmlAudio.loop=true; htmlAudio.volume=0.75;
+    htmlAudio.play().catch(()=>{});
+  } else if(CONFIG.playBuiltInTune){
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    synthGain=audioCtx.createGain();
+    synthGain.gain.value=SYNTH_VOL;
+    synthGain.connect(audioCtx.destination);
+    loopMelody();
+  }
+}
+function loopMelody(){
+  const total=playHappyBirthday();
+  setTimeout(loopMelody,(total+1.6)*1000);
+}
+function playHappyBirthday(){
+  const beat=0.42;
+  const N={C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392.0,A4:440.0,B4:493.88,
+    C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99};
+  const seq=[
+    ['G4',.75],['G4',.25],['A4',1],['G4',1],['C5',1],['B4',2],
+    ['G4',.75],['G4',.25],['A4',1],['G4',1],['D5',1],['C5',2],
+    ['G4',.75],['G4',.25],['G5',1],['E5',1],['C5',1],['B4',1],['A4',2],
+    ['F5',.75],['F5',.25],['E5',1],['C5',1],['D5',1],['C5',2]
+  ];
+  let t=audioCtx.currentTime+0.05;
+  for(const [note,beats] of seq){
+    const dur=beats*beat;
+    const osc=audioCtx.createOscillator(), g=audioCtx.createGain();
+    osc.type='triangle'; osc.frequency.value=N[note];
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(1,t+0.02);
+    g.gain.setValueAtTime(1,t+dur*0.78);
+    g.gain.linearRampToValueAtTime(0,t+dur*0.98);
+    osc.connect(g); g.connect(synthGain);
+    osc.start(t); osc.stop(t+dur);
+    t+=dur;
+  }
+  return t-audioCtx.currentTime;
+}
 </script>
 </body>
 </html>
